@@ -88,7 +88,6 @@ namespace app {
         }
     }
 
-
     void MainControler::update() {
         update_camera();
         update_darkness();
@@ -134,12 +133,12 @@ namespace app {
         glm::vec3 cam_dir = graphics->camera()->Front;
         shader->set_vec3("spotLightPos", cam_pos);
         shader->set_vec3("spotLightDir", cam_dir);
-        shader->set_vec3("spotLightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+        shader->set_vec3("spotLightColor", light_color);
         shader->set_float("spotCutOff", glm::cos(glm::radians(12.5f)));
         shader->set_float("spotOuterCutOff", glm::cos(glm::radians(17.5f)));
         shader->set_float("darkness", darkness);
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, -8.3f, -3.0f));
+        model = glm::translate(model, glm::vec3(0.0f, -9.0f, -3.0f));
         model = glm::scale(model, glm::vec3(0.3f));
         shader->set_mat4("model", model);
         terrain->draw(shader);
@@ -153,19 +152,32 @@ namespace app {
             show_sage_naruto = !show_sage_naruto;
         }
 
-        if (platform->key(engine::platform::KeyId::KEY_L).state() == engine::platform::Key::State::JustPressed) {
-            if (!is_flying) {
-                is_flying = true;
-                fly_start_time = current_time;
-            } else {
-                is_flying = false;
-                naruto_position = glm::vec3(0.0f, -5.0f, -20.0f);
+        if (platform->key(engine::platform::KeyId::KEY_R).state() == engine::platform::Key::State::JustPressed) {
+            if (!is_animating && !is_waiting) {
+                is_waiting = true;
+                wait_start_time = current_time;
             }
         }
 
-        if (is_flying) {
-            float elapsed = current_time - fly_start_time;
-            naruto_position.y = -2.0f + elapsed * 2.0f;
+        if (is_waiting) {
+            float elapsed = current_time - wait_start_time;
+            if (elapsed >= wait_duration) {
+                is_animating = true;
+                is_waiting = false;
+                animation_start_time = current_time;
+            }
+        }
+
+        if (is_animating) {
+            float elapsed = current_time - animation_start_time;
+            if (elapsed >= animation_duration) {
+                is_animating = false;
+                naruto_position = glm::vec3(0.0f, -6.5f, -20.0f);
+            } else {
+                float t = elapsed / animation_duration;
+                float height = sin(t * glm::pi<float>()) * 4.0f;
+                naruto_position.y = -6.5f + height;
+            }
         }
 
         if (show_sage_naruto) {
@@ -193,7 +205,7 @@ namespace app {
         glm::vec3 cam_dir = graphics->camera()->Front;
         shader->set_vec3("spotLightPos", cam_pos);
         shader->set_vec3("spotLightDir", cam_dir);
-        shader->set_vec3("spotLightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+        shader->set_vec3("spotLightColor", light_color);
         shader->set_float("spotCutOff", glm::cos(glm::radians(12.5f)));
         shader->set_float("spotOuterCutOff", glm::cos(glm::radians(17.5f)));
         shader->set_float("darkness", darkness);
@@ -201,8 +213,10 @@ namespace app {
         model = glm::translate(model, naruto_position);
         model = glm::scale(model, glm::vec3(6.0f));
 
-        if (platform->key(engine::platform::KeyId::KEY_R).is_down()) {
-            model = glm::rotate(model, static_cast<float>(glfwGetTime()), glm::vec3(0.0f, 1.0f, 0.0f));
+        if (is_animating) {
+            float elapsed = static_cast<float>(glfwGetTime()) - animation_start_time;
+            float angle = elapsed * 2.0f;
+            model = glm::rotate(model, angle, glm::vec3(0.0f, 1.0f, 0.0f));
         }
 
         shader->set_mat4("model", model);
@@ -226,16 +240,18 @@ namespace app {
         glm::vec3 cam_dir = graphics->camera()->Front;
         shader->set_vec3("spotLightPos", cam_pos);
         shader->set_vec3("spotLightDir", cam_dir);
-        shader->set_vec3("spotLightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+        shader->set_vec3("spotLightColor", light_color);
         shader->set_float("spotCutOff", glm::cos(glm::radians(12.5f)));
         shader->set_float("spotOuterCutOff", glm::cos(glm::radians(17.5f)));
         shader->set_float("darkness", darkness);
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, naruto_position);
-        model = glm::scale(model, glm::vec3(7.5f));
+        model = glm::scale(model, glm::vec3(8.5f));
 
-        if (platform->key(engine::platform::KeyId::KEY_R).is_down()) {
-          model = glm::rotate(model, static_cast<float>(glfwGetTime()), glm::vec3(0.0f, 1.0f, 0.0f));
+        if (is_animating) {
+            float elapsed = static_cast<float>(glfwGetTime()) - animation_start_time;
+            float angle = elapsed * 2.0f;
+            model = glm::rotate(model, angle, glm::vec3(0.0f, 1.0f, 0.0f));
         }
 
         shader->set_mat4("model", model);
