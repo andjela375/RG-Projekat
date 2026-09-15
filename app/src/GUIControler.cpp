@@ -38,15 +38,6 @@ void GUIControler::draw() {
         if (ImGui::ColorEdit3("Light color", light_color)) {
             main_controler->set_light_color(glm::vec3(light_color[0], light_color[1], light_color[2]));
         }
-
-        static float cube_pos[3] = {0.0f, -2.0f, -3.0f};
-        if (ImGui::SliderFloat3("Cube position", cube_pos, -10.0f, 10.0f)) {
-            main_controler->set_cube_position(glm::vec3(cube_pos[0], cube_pos[1], cube_pos[2]));
-        }
-
-        if (ImGui::Button("Trigger action")) {
-            main_controler->trigger_action();
-        }
     }
 
     ImGui::End();
