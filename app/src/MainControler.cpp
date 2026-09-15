@@ -150,7 +150,7 @@ void MainControler::draw_naruto() {
         auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
         engine::resources::Model* naruto = resources->model("Naruto");
 
-        engine::resources::Shader* shader = resources->shader("basic");
+        engine::resources::Shader* shader = resources->shader("naruto");
         shader->use();
         shader->set_mat4("projection", graphics->projection_matrix());
         shader->set_mat4("view", graphics->camera()->view_matrix());
@@ -178,7 +178,7 @@ void MainControler::draw_naruto_sage() {
         auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
         engine::resources::Model* narutoSage = resources->model("NarutoSage");
 
-        engine::resources::Shader* shader = resources->shader("basic");
+        engine::resources::Shader* shader = resources->shader("naruto");
         shader->use();
         shader->set_mat4("projection", graphics->projection_matrix());
         shader->set_mat4("view", graphics->camera()->view_matrix());
