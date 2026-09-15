@@ -9,6 +9,7 @@
 
 namespace app {
 class MainControler : public engine::core::Controller {
+public:
     void initialize() override;
     bool loop() override;
     void draw_skybox();
@@ -20,7 +21,11 @@ class MainControler : public engine::core::Controller {
     void begin_draw() override;
     void end_draw() override;
     void update_camera();
+    void update_darkness();
     void update() override;
+    std::string_view name() const override { return "app::MainControler"; }
+    void set_light_color(glm::vec3 color) {light_color = color;}
+    glm::vec3 get_light_color() const {return light_color;}
 
 private:
     bool show_sage_naruto = false;
@@ -28,11 +33,11 @@ private:
 
     bool is_flying = false;
     float fly_start_time = 0.0f;
-    glm::vec3 naruto_position = glm::vec3(0.0f, -2.0f, -3.0f);
+    glm::vec3 naruto_position = glm::vec3(0.0f, -5.0f, -20.0f);
 
-public:
-    std::string_view name() const override { return "app::MainControler"; }
-    void set_light_color(glm::vec3 color) {light_color = color;}
+    bool is_dark = false;
+    float darkness = 0.0f;
+
 };
 
 }

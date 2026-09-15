@@ -20,7 +20,10 @@ out vec4 FragColor;
 in vec3 TexCords;
 
 uniform samplerCube skybox;
+uniform float darkness;
 
 void main() {
-    FragColor = texture(skybox, TexCords);
+    vec3 color = texture(skybox, TexCords).rgb;
+    color = color * (1.0f - darkness * 0.9f);
+    FragColor = vec4(color, 1.0f);
 }

@@ -32,12 +32,20 @@ void GUIControler::draw() {
 
     ImGui::Text("Camera position: (%f, %f, %f)", camera->Position.x, camera->Position.y, camera->Position.z);
 
+    ImGui::Separator();
+    ImGui::Text("Naruto light control");
+
     auto main_controler = engine::core::Controller::get<MainControler>();
     if (main_controler) {
-        static float light_color[3] = {1.0f, 1.0f, 1.0f};
+        glm::vec3 current = main_controler->get_light_color();
+        static float light_color[3] = {current.r, current.g, current.b};
+
         if (ImGui::ColorEdit3("Light color", light_color)) {
             main_controler->set_light_color(glm::vec3(light_color[0], light_color[1], light_color[2]));
         }
+
+        glm::vec3 c = main_controler->get_light_color();
+        ImGui::Text("Current: R=%.2f, G=%.2f, B=%.2f", c.r, c.g, c.b);
     }
 
     ImGui::End();

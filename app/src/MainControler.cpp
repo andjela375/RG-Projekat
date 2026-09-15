@@ -7,10 +7,10 @@
 #include "engine/graphics/OpenGL.hpp"
 #include "engine/platform/PlatformController.hpp"
 #include "engine/resources/ResourcesController.hpp"
-#include "spdlog/logger.h"
 #include "spdlog/spdlog.h"
 #include "GLFW/glfw3.h"
 #include "cmath"
+#include "algorithm"
 
 #include <MainControler.h>
 
@@ -70,8 +70,28 @@ namespace app {
         }
     }
 
+    void MainControler::update_darkness() {
+        auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
+
+        if (platform->key(engine::platform::KeyId::KEY_P).state() == engine::platform::Key::State::JustPressed) {
+            is_dark = !is_dark;
+        }
+
+        float dt = platform->dt();
+        float target = is_dark ? 1.0f : 0.0f;
+        float speed = 1.5f;
+
+        if (darkness < target) {
+            darkness = std::min(darkness + speed * dt, target);
+        } else if (darkness > target) {
+            darkness = std::max(darkness - speed * dt, target);
+        }
+    }
+
+
     void MainControler::update() {
         update_camera();
+        update_darkness();
     }
 
     void MainControler::begin_draw() {
@@ -83,6 +103,10 @@ namespace app {
         auto skybox = resources->skybox("skybox");
         auto shader = resources->shader("skybox");
         auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
+
+        shader->use();
+        shader->set_float("darkness", darkness);
+
         graphics->draw_skybox(shader, skybox);
     }
 
@@ -106,14 +130,22 @@ namespace app {
         shader->use();
         shader->set_mat4("projection", graphics->projection_matrix());
         shader->set_mat4("view", graphics->camera()->view_matrix());
+        glm::vec3 cam_pos = graphics->camera()->Position;
+        glm::vec3 cam_dir = graphics->camera()->Front;
+        shader->set_vec3("spotLightPos", cam_pos);
+        shader->set_vec3("spotLightDir", cam_dir);
+        shader->set_vec3("spotLightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+        shader->set_float("spotCutOff", glm::cos(glm::radians(12.5f)));
+        shader->set_float("spotOuterCutOff", glm::cos(glm::radians(17.5f)));
+        shader->set_float("darkness", darkness);
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, -4.5f, -3.0f));
+        model = glm::translate(model, glm::vec3(0.0f, -8.3f, -3.0f));
         model = glm::scale(model, glm::vec3(0.3f));
         shader->set_mat4("model", model);
         terrain->draw(shader);
     }
 
-void MainControler::naruto() {
+    void MainControler::naruto() {
         auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
         float current_time = static_cast<float>(glfwGetTime());
 
@@ -127,7 +159,7 @@ void MainControler::naruto() {
                 fly_start_time = current_time;
             } else {
                 is_flying = false;
-                naruto_position = glm::vec3(0.0f, -2.0f, -3.0f);
+                naruto_position = glm::vec3(0.0f, -5.0f, -20.0f);
             }
         }
 
@@ -144,7 +176,7 @@ void MainControler::naruto() {
     }
 
 
-void MainControler::draw_naruto() {
+    void MainControler::draw_naruto() {
         auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
         auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
         auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
@@ -157,12 +189,17 @@ void MainControler::draw_naruto() {
         shader->set_vec3("lightColor", light_color);
         shader->set_vec3("lightPos", glm::vec3(5.0f, 5.0f, 5.0f));
         shader->set_vec3("viewPos", graphics->camera()->Position);
+        glm::vec3 cam_pos = graphics->camera()->Position;
+        glm::vec3 cam_dir = graphics->camera()->Front;
+        shader->set_vec3("spotLightPos", cam_pos);
+        shader->set_vec3("spotLightDir", cam_dir);
+        shader->set_vec3("spotLightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+        shader->set_float("spotCutOff", glm::cos(glm::radians(12.5f)));
+        shader->set_float("spotOuterCutOff", glm::cos(glm::radians(17.5f)));
+        shader->set_float("darkness", darkness);
         glm::mat4 model = glm::mat4(1.0f);
-        //model = glm::translate(model, glm::vec3(4.5f, -7.5f, -40.0f));
-        //model = glm::rotate(model, glm::radians(270.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-        //model = glm::rotate(model, glm::radians(55.0f), glm::vec3(0.0f, 0.0f, 1.0f));
         model = glm::translate(model, naruto_position);
-        model = glm::scale(model, glm::vec3(1.0f));
+        model = glm::scale(model, glm::vec3(6.0f));
 
         if (platform->key(engine::platform::KeyId::KEY_R).is_down()) {
             model = glm::rotate(model, static_cast<float>(glfwGetTime()), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -172,7 +209,7 @@ void MainControler::draw_naruto() {
         naruto->draw(shader);
     }
 
-void MainControler::draw_naruto_sage() {
+    void MainControler::draw_naruto_sage() {
         auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
         auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
         auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
@@ -185,9 +222,17 @@ void MainControler::draw_naruto_sage() {
         shader->set_vec3("lightColor", light_color);
         shader->set_vec3("lightPos", glm::vec3(5.0f, 5.0f, 5.0f));
         shader->set_vec3("viewPos", graphics->camera()->Position);
+        glm::vec3 cam_pos = graphics->camera()->Position;
+        glm::vec3 cam_dir = graphics->camera()->Front;
+        shader->set_vec3("spotLightPos", cam_pos);
+        shader->set_vec3("spotLightDir", cam_dir);
+        shader->set_vec3("spotLightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+        shader->set_float("spotCutOff", glm::cos(glm::radians(12.5f)));
+        shader->set_float("spotOuterCutOff", glm::cos(glm::radians(17.5f)));
+        shader->set_float("darkness", darkness);
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, naruto_position);
-        model = glm::scale(model, glm::vec3(1.5f));
+        model = glm::scale(model, glm::vec3(7.5f));
 
         if (platform->key(engine::platform::KeyId::KEY_R).is_down()) {
           model = glm::rotate(model, static_cast<float>(glfwGetTime()), glm::vec3(0.0f, 1.0f, 0.0f));
