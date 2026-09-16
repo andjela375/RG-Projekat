@@ -1,6 +1,15 @@
 {
   "resources": {
     "models": {
+      "Naruto" : {
+        "path" : "naruto/Naruto.obj"
+      },
+      "terrain": {
+        "path" : "terrain/grass.obj"
+      },
+      "NarutoSage" : {
+        "path" : "NarutoSage/Naruto.obj"
+      }
     }
   },
   "window": {
