@@ -17,6 +17,6 @@ private:
     void draw() override;
     void poll_events() override;
 };
-}
+}// namespace app
 
 #endif//MATF_RG_PROJECT_GUICONTROLER_H

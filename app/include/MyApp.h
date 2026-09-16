@@ -10,6 +10,6 @@ namespace app {
 class MyApp : public engine::core::App {
     void app_setup() override;
 };
-}
+}// namespace app
 
 #endif//MATF_RG_PROJECT_MYAPP_H
